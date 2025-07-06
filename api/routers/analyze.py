@@ -40,7 +40,8 @@ async def analyze_content(request: AnalyzeRequest):
         # Mengubah cara pemanggilan fungsi agar sesuai dengan definisi baru
         viral_score = await viral_service.calculate_viral_score(
             content=transcript,
-            metadata=video_metadata
+            metadata=video_metadata,
+            average_view_duration=request.average_view_duration
         )
         
         if viral_score >= 80: viral_label = "Very High Potential"

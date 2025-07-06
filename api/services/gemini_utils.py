@@ -2,7 +2,7 @@ import os
 import logging
 from typing import Dict, List
 import google.generativeai as genai
-from models.schemas import ContentRecommendation
+from models.schemas import ContentRecommendation, PlatformRecommendation
 import json
 
 logger = logging.getLogger(__name__)
@@ -206,14 +206,14 @@ def _generate_fallback_viral_explanation(views: int, likes: int) -> str:
 
 async def generate_content_idea(category: str, summary: str, reason: str) -> ContentRecommendation:
     """
-    Generate content recommendation based on analysis.
+    Generate content recommendation based on analysis with platform recommendations.
     """
     # Clean inputs
     clean_summary = summary.replace('\n', ' ').strip()[:600]
     clean_reason = reason.replace('\n', ' ').strip()[:600]
     
     prompt = f"""
-Based on this content analysis, create a new content recommendation in JSON format.
+Based on this content analysis, create a new content recommendation in JSON format with platform-specific recommendations.
 
 Category: {category}
 Original Summary: {clean_summary}
@@ -237,8 +237,45 @@ Create a JSON response with this exact structure:
         "Tip 4",
         "Tip 5"
     ],
-    "estimated_viral_score": 75
+    "estimated_viral_score": 75,
+    "platform_recommendations": [
+        {{
+            "platform": "YouTube",
+            "suitability_score": 85,
+            "reasoning": "Why this platform is best suited for this content type",
+            "optimization_tips": [
+                "Platform-specific tip 1",
+                "Platform-specific tip 2",
+                "Platform-specific tip 3"
+            ]
+        }},
+        {{
+            "platform": "TikTok",
+            "suitability_score": 70,
+            "reasoning": "How to adapt content for TikTok",
+            "optimization_tips": [
+                "TikTok-specific tip 1",
+                "TikTok-specific tip 2",
+                "TikTok-specific tip 3"
+            ]
+        }},
+        {{
+            "platform": "Instagram",
+            "suitability_score": 65,
+            "reasoning": "Instagram adaptation strategy",
+            "optimization_tips": [
+                "Instagram-specific tip 1",
+                "Instagram-specific tip 2",
+                "Instagram-specific tip 3"
+            ]
+        }}
+    ]
 }}
+
+Consider these factors for platform recommendations:
+- YouTube: Best for long-form educational content, tutorials, detailed explanations
+- TikTok: Best for short, engaging, trend-based content with quick hooks
+- Instagram: Best for visually appealing content, lifestyle, behind-the-scenes
 
 Respond only with valid JSON:
 """
@@ -293,7 +330,39 @@ def _create_fallback_recommendation() -> ContentRecommendation:
             "Create content that viewers will want to save and share",
             "Optimize your title and thumbnail for maximum click-through rate"
         ],
-        estimated_viral_score=78
+        estimated_viral_score=78,
+        platform_recommendations=[
+            PlatformRecommendation(
+                platform="YouTube",
+                suitability_score=85,
+                reasoning="YouTube is ideal for educational content with its long-form format allowing for detailed explanations and step-by-step tutorials that build authority and trust.",
+                optimization_tips=[
+                    "Create compelling thumbnails with clear text and contrasting colors",
+                    "Use timestamps in descriptions for easy navigation",
+                    "Engage with comments within the first hour of posting"
+                ]
+            ),
+            PlatformRecommendation(
+                platform="TikTok",
+                suitability_score=70,
+                reasoning="TikTok works well for quick tips and highlights from longer content, especially when adapted to trending formats and sounds.",
+                optimization_tips=[
+                    "Hook viewers in the first 3 seconds with a compelling question",
+                    "Use trending sounds and hashtags relevant to your niche",
+                    "Keep text overlays minimal and easy to read"
+                ]
+            ),
+            PlatformRecommendation(
+                platform="Instagram",
+                suitability_score=65,
+                reasoning="Instagram is perfect for visual storytelling and behind-the-scenes content that builds personal connection with your audience.",
+                optimization_tips=[
+                    "Use carousel posts to share step-by-step processes",
+                    "Create visually consistent content that matches your brand",
+                    "Leverage Instagram Stories for real-time engagement"
+                ]
+            )
+        ]
     )
 
 async def summarize_document(file_path: str) -> str:

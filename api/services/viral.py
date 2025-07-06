@@ -98,6 +98,31 @@ class ViralAnalysisService:
             
         return min(engagement_score, 30) # Batas atas skor engagement
 
+    def _calculate_viewer_retention_score(self, average_view_duration: Optional[int], video_duration: int) -> int:
+        """
+        Menghitung skor berdasarkan retensi penonton (watch time).
+        Skor ini sangat penting untuk algoritma YouTube.
+        """
+        if not average_view_duration or video_duration <= 0:
+            return 5 # Skor default jika data tidak tersedia
+        
+        # Hitung persentase retensi
+        retention_percentage = (average_view_duration / video_duration) * 100
+        
+        # Skor berdasarkan persentase retensi
+        if retention_percentage >= 70:
+            return 25 # Retensi luar biasa (>70%)
+        elif retention_percentage >= 60:
+            return 20 # Retensi sangat baik (60-70%)
+        elif retention_percentage >= 50:
+            return 15 # Retensi baik (50-60%)
+        elif retention_percentage >= 40:
+            return 12 # Retensi cukup (40-50%)
+        elif retention_percentage >= 30:
+            return 8 # Retensi rendah (30-40%)
+        else:
+            return 3 # Retensi sangat rendah (<30%)
+
     def _calculate_title_score(self, title: str) -> int:
         """Menghitung skor berdasarkan kualitas judul (clickbait vs. informatif)."""
         title_lower = title.lower()
@@ -149,7 +174,8 @@ class ViralAnalysisService:
     async def calculate_viral_score(
         self,
         content: str,
-        metadata: VideoMetadata
+        metadata: VideoMetadata,
+        average_view_duration: Optional[int] = None
     ) -> int:
         """
         Orkestrasi perhitungan skor viral berdasarkan metrik gabungan.
@@ -161,14 +187,17 @@ class ViralAnalysisService:
             # 2. Skor Engagement (Suka & Komentar)
             engagement_score = self._calculate_engagement_score(metadata)
 
-            # 3. Skor Judul
+            # 3. Skor Retensi Penonton (Watch Time) - NEW
+            retention_score = self._calculate_viewer_retention_score(average_view_duration, metadata.duration)
+
+            # 4. Skor Judul
             title_score = self._calculate_title_score(metadata.title)
             
-            # 4. Skor Kualitas Konten
+            # 5. Skor Kualitas Konten
             quality_score = self._calculate_content_quality_score(content, metadata.title)
 
             # Penjumlahan total skor
-            total_score = velocity_score + engagement_score + title_score + quality_score
+            total_score = velocity_score + engagement_score + retention_score + title_score + quality_score
             
             # Normalisasi skor akhir
             final_score = max(0, min(100, total_score))
@@ -176,7 +205,7 @@ class ViralAnalysisService:
             logger.info(
                 f"Viral score calculated: "
                 f"Velocity({velocity_score}) + Engagement({engagement_score}) + "
-                f"Title({title_score}) + Quality({quality_score}) = {final_score}"
+                f"Retention({retention_score}) + Title({title_score}) + Quality({quality_score}) = {final_score}"
             )
             return final_score
 

@@ -6,6 +6,7 @@ class AnalyzeRequest(BaseModel):
     """Request model for content analysis."""
     youtube_url: Optional[str] = Field(None, description="YouTube video URL to analyze")
     file_path: Optional[str] = Field(None, description="File path for document analysis")
+    average_view_duration: Optional[int] = Field(None, description="Average view duration in seconds from YouTube Studio")
 
 class VideoMetadata(BaseModel):
     """Video metadata information."""
@@ -27,6 +28,13 @@ class TimelineItem(BaseModel):
     timestamp: str = Field(..., description="Time range (e.g., '00:00 - 01:00')")
     summary: str = Field(..., description="Summary for this time segment")
 
+class PlatformRecommendation(BaseModel):
+    """Platform recommendation for viral content."""
+    platform: str = Field(..., description="Recommended platform (YouTube, TikTok, Instagram)")
+    suitability_score: int = Field(..., ge=0, le=100, description="Suitability score for this platform")
+    reasoning: str = Field(..., description="Why this platform is recommended")
+    optimization_tips: List[str] = Field(..., description="Platform-specific optimization tips")
+
 class ContentRecommendation(BaseModel):
     """Content recommendation based on analysis."""
     title: str = Field(..., description="Recommended content title")
@@ -35,6 +43,7 @@ class ContentRecommendation(BaseModel):
     suggested_structure: Dict[str, str] = Field(..., description="Suggested content structure")
     pro_tips: List[str] = Field(..., description="Pro tips for maximum engagement")
     estimated_viral_score: int = Field(..., ge=0, le=100, description="Estimated viral score")
+    platform_recommendations: List[PlatformRecommendation] = Field(..., description="Platform-specific recommendations")
 
 class AnalyzeResponse(BaseModel):
     """Response model for content analysis."""

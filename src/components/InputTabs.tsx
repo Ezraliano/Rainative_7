@@ -13,6 +13,13 @@ interface TimelineItem {
   summary: string;
 }
 
+interface PlatformRecommendation {
+  platform: string;
+  suitability_score: number;
+  reasoning: string;
+  optimization_tips: string[];
+}
+
 interface AnalysisData {
   video_metadata?: {
     title: string;
@@ -39,6 +46,7 @@ interface AnalysisData {
     };
     pro_tips: string[];
     estimated_viral_score: number;
+    platform_recommendations: PlatformRecommendation[];
   };
   doc_summary?: string;
 }
@@ -53,9 +61,31 @@ const InputTabs: React.FC = () => {
   });
   const [expandedTimeline, setExpandedTimeline] = useState<number[]>([0]);
   const [youtubeUrl, setYoutubeUrl] = useState('');
+  const [avgViewDuration, setAvgViewDuration] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [analysisData, setAnalysisData] = useState<AnalysisData | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const convertTimeToSeconds = (timeString: string): number | null => {
+    if (!timeString.trim()) return null;
+    
+    // Support formats: MM:SS, M:SS, SS
+    const parts = timeString.split(':');
+    
+    if (parts.length === 1) {
+      // Just seconds
+      const seconds = parseInt(parts[0]);
+      return isNaN(seconds) ? null : seconds;
+    } else if (parts.length === 2) {
+      // MM:SS format
+      const minutes = parseInt(parts[0]);
+      const seconds = parseInt(parts[1]);
+      if (isNaN(minutes) || isNaN(seconds)) return null;
+      return minutes * 60 + seconds;
+    }
+    
+    return null;
+  };
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -108,14 +138,24 @@ const InputTabs: React.FC = () => {
       let response;
       
       if (activeTab === 'youtube') {
+        const requestBody: any = {
+          youtube_url: youtubeUrl,
+        };
+
+        // Add average view duration if provided
+        if (avgViewDuration.trim()) {
+          const durationInSeconds = convertTimeToSeconds(avgViewDuration);
+          if (durationInSeconds !== null) {
+            requestBody.average_view_duration = durationInSeconds;
+          }
+        }
+
         response = await fetch('http://localhost:8000/api/analyze', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            youtube_url: youtubeUrl,
-          }),
+          body: JSON.stringify(requestBody),
         });
       } else {
         // Document upload
@@ -162,6 +202,24 @@ const InputTabs: React.FC = () => {
     if (score >= 80) return 'from-green-400 to-emerald-500';
     if (score >= 60) return 'from-yellow-400 to-orange-500';
     return 'from-red-400 to-pink-500';
+  };
+
+  const getPlatformIcon = (platform: string) => {
+    switch (platform.toLowerCase()) {
+      case 'youtube': return '📺';
+      case 'tiktok': return '🎵';
+      case 'instagram': return '📸';
+      default: return '🌐';
+    }
+  };
+
+  const getPlatformColor = (platform: string) => {
+    switch (platform.toLowerCase()) {
+      case 'youtube': return 'from-red-500 to-red-600';
+      case 'tiktok': return 'from-pink-500 to-purple-600';
+      case 'instagram': return 'from-purple-500 to-pink-500';
+      default: return 'from-gray-500 to-gray-600';
+    }
   };
 
   const formatDuration = (seconds: number) => {
@@ -397,7 +455,7 @@ const InputTabs: React.FC = () => {
                 Create Similar Viral Content
               </h2>
               
-              <div className="bg-gray-800 rounded-2xl p-8 border border-gray-700">
+              <div className="bg-gray-800 rounded-2xl p-8 border border-gray-700 mb-8">
                 <div className="flex items-center mb-6">
                   <Zap className="w-8 h-8 text-yellow-400 mr-3" />
                   <h3 className="text-2xl font-semibold text-white">Recommended Content Idea</h3>
@@ -470,6 +528,60 @@ const InputTabs: React.FC = () => {
                   </ul>
                 </div>
               </div>
+
+              {/* Platform Recommendations */}
+              {analysisData.recommendations.platform_recommendations && (
+                <div className="bg-gray-800 rounded-2xl p-8 border border-gray-700">
+                  <h3 className="text-2xl font-semibold text-white mb-6 flex items-center">
+                    <span className="text-2xl mr-3">🚀</span>
+                    Platform Recommendations
+                  </h3>
+                  <div className="grid md:grid-cols-3 gap-6">
+                    {analysisData.recommendations.platform_recommendations
+                      .sort((a, b) => b.suitability_score - a.suitability_score)
+                      .map((platform, index) => (
+                      <div key={index} className="bg-gray-900 rounded-xl p-6 border border-gray-700 hover:border-gray-600 transition-all duration-300">
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center">
+                            <span className="text-2xl mr-3">{getPlatformIcon(platform.platform)}</span>
+                            <h4 className="text-lg font-semibold text-white">{platform.platform}</h4>
+                          </div>
+                          <div className="text-right">
+                            <div className={`text-sm font-bold bg-gradient-to-r ${getPlatformColor(platform.platform)} bg-clip-text text-transparent`}>
+                              {platform.suitability_score}/100
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="mb-4">
+                          <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
+                            <div 
+                              className={`h-2 rounded-full bg-gradient-to-r ${getPlatformColor(platform.platform)} transition-all duration-1000`}
+                              style={{ width: `${platform.suitability_score}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                        
+                        <p className="text-gray-300 text-sm mb-4 leading-relaxed">
+                          {platform.reasoning}
+                        </p>
+                        
+                        <div>
+                          <h5 className="text-white font-medium mb-2 text-sm">Optimization Tips:</h5>
+                          <ul className="text-gray-400 text-xs space-y-1">
+                            {platform.optimization_tips.map((tip, tipIndex) => (
+                              <li key={tipIndex} className="flex items-start">
+                                <span className="text-cyan-400 mr-1">•</span>
+                                {tip}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -525,22 +637,45 @@ const InputTabs: React.FC = () => {
             <p className="text-gray-500 text-sm mt-2">This may take a few moments</p>
           </div>
         ) : activeTab === 'youtube' ? (
-          <div className="flex flex-col sm:flex-row items-center gap-4">
-            <input
-              type="text"
-              placeholder="Paste YouTube video URL here"
-              value={youtubeUrl}
-              onChange={(e) => setYoutubeUrl(e.target.value)}
-              className="w-full px-6 py-4 bg-gray-800 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-300"
-            />
-            <button
-              onClick={handleSubmit}
-              disabled={summaryState.isLoading}
-              className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-xl hover:from-cyan-700 hover:to-blue-700 transition-all duration-300 flex items-center justify-center whitespace-nowrap shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <Sparkles className="h-5 w-5 mr-2" />
-              Start Analysis
-            </button>
+          <div className="space-y-4">
+            <div className="flex flex-col sm:flex-row items-center gap-4">
+              <input
+                type="text"
+                placeholder="Paste YouTube video URL here"
+                value={youtubeUrl}
+                onChange={(e) => setYoutubeUrl(e.target.value)}
+                className="w-full px-6 py-4 bg-gray-800 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-300"
+              />
+              <button
+                onClick={handleSubmit}
+                disabled={summaryState.isLoading}
+                className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-xl hover:from-cyan-700 hover:to-blue-700 transition-all duration-300 flex items-center justify-center whitespace-nowrap shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Sparkles className="h-5 w-5 mr-2" />
+                Start Analysis
+              </button>
+            </div>
+            
+            {/* Average View Duration Input */}
+            <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700">
+              <div className="flex items-center mb-3">
+                <Clock className="w-5 h-5 text-cyan-400 mr-2" />
+                <h4 className="text-white font-medium">Average View Duration (Optional)</h4>
+              </div>
+              <p className="text-gray-400 text-sm mb-3">
+                Enter the average view duration from your YouTube Studio analytics for more accurate viral scoring.
+              </p>
+              <input
+                type="text"
+                placeholder="e.g., 2:30 or 150"
+                value={avgViewDuration}
+                onChange={(e) => setAvgViewDuration(e.target.value)}
+                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-300"
+              />
+              <p className="text-gray-500 text-xs mt-2">
+                Format: MM:SS (e.g., 2:30) or seconds (e.g., 150)
+              </p>
+            </div>
           </div>
         ) : (
           <div className="space-y-6">
