@@ -176,19 +176,29 @@ Views: {views:,}
 Likes: {likes:,}
 Content Summary: {clean_summary}
 
-Provide a brief analysis covering:
-1. What makes this content engaging
-2. Why it resonates with audiences
-3. Key viral factors
+Provide a detailed analysis in clean, well-structured format covering:
 
-Keep the response factual and professional.
+1. What makes this content engaging
+2. Why it resonates with audiences  
+3. Key viral factors
+4. Audience appeal elements
+5. Content structure strengths
+Requirements:
+- Use clean paragraphs without asterisks or markdown formatting
+- Write in clear, professional language
+- Structure with numbered points for key insights
+- Keep each point concise but informative
+- Focus on actionable viral elements
 
 Analysis:
 """
 
     try:
         explanation = await gemini_service._generate_content(prompt)
-        return explanation.strip()
+        # Clean up any markdown formatting
+        cleaned_explanation = explanation.strip()
+        cleaned_explanation = cleaned_explanation.replace('**', '').replace('*', '')
+        return cleaned_explanation
     except Exception as e:
         logger.error(f"Error generating viral explanation: {e}")
         return _generate_fallback_viral_explanation(views, likes)
@@ -198,11 +208,41 @@ def _generate_fallback_viral_explanation(views: int, likes: int) -> str:
     engagement_ratio = (likes / views * 100) if views > 0 else 0
     
     if engagement_ratio > 5:
-        return "This content shows strong viral potential due to its high engagement rate and compelling topic that resonates with viewers. The combination of valuable information and engaging presentation style makes it highly shareable."
+        return """This content demonstrates exceptional viral potential through several key factors.
+
+1. High engagement rate indicates strong audience connection and compelling content that motivates interaction.
+
+2. The topic resonates deeply with viewers, creating emotional investment that drives sharing behavior.
+
+3. Valuable information combined with engaging presentation style creates a perfect formula for viral spread.
+
+4. Content structure and timing align with platform algorithms and user consumption patterns.
+
+5. The combination of entertainment and educational value maximizes appeal across diverse audience segments."""
     elif engagement_ratio > 2:
-        return "This content demonstrates good viral potential with solid engagement metrics. The topic appears to be relevant and interesting to the target audience, with room for optimization in presentation and distribution."
+        return """This content shows solid viral potential with several positive indicators.
+
+1. Good engagement metrics suggest the content connects well with its target audience.
+
+2. The topic demonstrates relevance and interest within the niche, creating natural sharing motivation.
+
+3. Content quality and presentation meet platform standards for algorithmic promotion.
+
+4. Room for optimization exists in presentation style and distribution strategy to maximize reach.
+
+5. Strong foundation for viral growth with strategic improvements in timing and audience targeting."""
     else:
-        return "This content has moderate viral potential. While the topic may be valuable, improving the presentation style, timing, and audience targeting could significantly increase its viral reach and engagement."
+        return """This content has moderate viral potential with opportunities for enhancement.
+
+1. The core topic contains valuable information that could appeal to a broader audience with refinement.
+
+2. Presentation style improvements could significantly boost engagement and shareability.
+
+3. Better timing and audience targeting strategies would increase viral reach potential.
+
+4. Content structure optimization could improve retention and completion rates.
+
+5. Strategic distribution and promotion could amplify the existing value to achieve viral status."""
 
 async def generate_content_idea(category: str, summary: str, reason: str) -> ContentRecommendation:
     """
