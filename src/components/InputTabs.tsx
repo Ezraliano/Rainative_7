@@ -488,64 +488,90 @@ const InputTabs: React.FC = () => {
 
           {activeSection === 'viral' && (
             <div className="text-center">
-              <h2 className="text-3xl font-bold text-white mb-8 bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">
-                Viral Analysis
+              <h2 className="text-4xl font-bold text-white mb-12 bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent flex items-center justify-center">
+                <span className="text-4xl mr-4">🔥</span>
+                Viral Potential Analysis
+                <span className="text-4xl ml-4">📈</span>
               </h2>
               
               {/* Viral Score */}
-              <div className="mb-12">
-                <div className="relative w-48 h-48 mx-auto mb-6">
-                  <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+              <div className="mb-16">
+                <div className="relative w-80 h-80 mx-auto mb-8 drop-shadow-2xl">
+                  <svg className="w-full h-full transform -rotate-90 filter drop-shadow-lg" viewBox="0 0 100 100">
                     <circle
                       cx="50"
                       cy="50"
                       r="40"
                       stroke="currentColor"
-                      strokeWidth="8"
+                      strokeWidth="6"
                       fill="none"
-                      className="text-gray-700"
+                      className="text-gray-800"
                     />
                     <circle
                       cx="50"
                       cy="50"
                       r="40"
                       stroke="url(#gradient)"
-                      strokeWidth="8"
+                      strokeWidth="6"
                       fill="none"
                       strokeDasharray={`${2 * Math.PI * 40}`}
                       strokeDashoffset={`${2 * Math.PI * 40 * (1 - analysisData.viral_score / 100)}`}
-                      className="transition-all duration-1000 ease-out"
+                      className="transition-all duration-2000 ease-out filter drop-shadow-md"
                       strokeLinecap="round"
                     />
                     <defs>
                       <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" className="text-green-400" stopColor="currentColor" />
-                        <stop offset="100%" className="text-emerald-500" stopColor="currentColor" />
+                        <stop offset="0%" stopColor="#10b981" />
+                        <stop offset="50%" stopColor="#06d6a0" />
+                        <stop offset="100%" stopColor="#00f5ff" />
                       </linearGradient>
+                      <filter id="glow">
+                        <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                        <feMerge> 
+                          <feMergeNode in="coloredBlur"/>
+                          <feMergeNode in="SourceGraphic"/>
+                        </feMerge>
+                      </filter>
                     </defs>
                   </svg>
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="text-center">
-                      <div className="text-4xl font-bold text-white">{analysisData.viral_score}</div>
-                      <div className="text-sm text-gray-400">out of 100</div>
+                      <div className="text-7xl font-bold text-white mb-2 drop-shadow-lg">{analysisData.viral_score}</div>
+                      <div className="text-lg text-gray-400 font-medium">out of 100</div>
                     </div>
                   </div>
                 </div>
-                <div className={`inline-flex items-center px-6 py-3 rounded-full bg-gradient-to-r ${getViralScoreColor(analysisData.viral_score)} text-white font-semibold text-lg shadow-lg`}>
+                <div className={`inline-flex items-center px-8 py-4 rounded-full bg-gradient-to-r ${getViralScoreColor(analysisData.viral_score)} text-white font-semibold text-xl shadow-2xl`}>
                   <TrendingUp className="w-5 h-5 mr-2" />
                   {analysisData.viral_label}
                 </div>
               </div>
 
               {/* Why is this content viral? */}
-              <div className="bg-gray-800 rounded-2xl p-8 border border-gray-700 text-left">
-                <h3 className="text-2xl font-semibold text-white mb-6 flex items-center">
-                  <span className="text-2xl mr-3">🔥</span>
-                  Why does this content have viral potential?
+              <div className="bg-gray-800 rounded-3xl p-10 border border-gray-700 text-left shadow-2xl">
+                <h3 className="text-3xl font-semibold text-white mb-8 flex items-center">
+                  <span className="text-3xl mr-4">💡</span>
+                  Why Does This Content Have Viral Potential?
                 </h3>
-                <p className="text-gray-300 text-lg leading-relaxed">
-                  {analysisData.viral_explanation}
-                </p>
+                <div className="text-gray-300 text-lg leading-relaxed space-y-4">
+                  {analysisData.viral_explanation.split('\n').map((paragraph, index) => {
+                    if (paragraph.trim()) {
+                      // Check if it's a list item
+                      if (paragraph.trim().match(/^\d+\./)) {
+                        return (
+                          <div key={index} className="flex items-start mb-4">
+                            <div className="w-8 h-8 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full flex items-center justify-center mr-4 mt-1 flex-shrink-0">
+                              <span className="text-white font-bold text-sm">{paragraph.trim().charAt(0)}</span>
+                            </div>
+                            <p className="flex-1">{paragraph.replace(/^\d+\.\s*/, '')}</p>
+                          </div>
+                        );
+                      }
+                      return <p key={index} className="mb-4">{paragraph}</p>;
+                    }
+                    return null;
+                  })}
+                </div>
               </div>
             </div>
           )}
