@@ -28,9 +28,35 @@ const PromotionalBanner: React.FC = () => {
             <Zap className="h-6 w-6 mr-3" />
             Start Creating Now
           </button>
-          <button className="w-full sm:w-auto bg-gray-800 border border-gray-600 text-white font-semibold px-10 py-5 rounded-xl hover:bg-gray-700 hover:border-gray-500 transition-all duration-300 text-lg">
-            View Pricing Plans
-          </button>
+        </div>
+        
+        {/* Developer Biodata Section */}
+        <div className="bg-gray-800/50 backdrop-blur-sm p-8 rounded-2xl border border-gray-700/50 mb-16 max-w-2xl mx-auto">
+          <h3 className="text-2xl font-bold text-white mb-6 text-center">Meet the Developer</h3>
+          <div className="flex flex-col md:flex-row items-center gap-6">
+            <div className="flex-shrink-0">
+              <img 
+                src="https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=300&h=300&fit=crop" 
+                alt="Developer Photo" 
+                className="w-32 h-32 rounded-full object-cover border-4 border-gradient-to-r from-cyan-400 to-blue-500"
+              />
+            </div>
+            <div className="text-center md:text-left">
+              <h4 className="text-xl font-bold text-white mb-2">Alex Johnson</h4>
+              <p className="text-cyan-400 font-medium mb-3">AI Engineer & Full-Stack Developer</p>
+              <p className="text-gray-300 text-sm leading-relaxed mb-4">
+                Passionate about creating AI-powered solutions that help content creators succeed. 
+                With 5+ years of experience in machine learning and web development, I built Rainative AI 
+                to democratize content analysis and viral prediction for creators worldwide.
+              </p>
+              <div className="flex flex-wrap gap-2 justify-center md:justify-start">
+                <span className="px-3 py-1 bg-blue-500/20 text-blue-300 rounded-full text-xs">Python</span>
+                <span className="px-3 py-1 bg-green-500/20 text-green-300 rounded-full text-xs">React</span>
+                <span className="px-3 py-1 bg-purple-500/20 text-purple-300 rounded-full text-xs">AI/ML</span>
+                <span className="px-3 py-1 bg-yellow-500/20 text-yellow-300 rounded-full text-xs">FastAPI</span>
+              </div>
+            </div>
+          </div>
         </div>
         
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">

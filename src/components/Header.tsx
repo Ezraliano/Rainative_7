@@ -10,10 +10,6 @@ const Header: React.FC = () => {
           Rainative AI
         </h1>
       </div>
-      <button className="px-6 py-3 border border-gray-600 rounded-xl text-gray-300 hover:bg-gray-800 hover:text-white transition-all duration-300 text-sm flex items-center">
-        <LogOut className="h-4 w-4 mr-2" />
-        Sign out
-      </button>
     </header>
   );
 };
