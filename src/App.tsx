@@ -1,6 +1,7 @@
 import React from 'react';
 import Header from './components/Header';
 import MainSection from './components/MainSection';
+import DigitalMarketingSection from './components/DigitalMarketingSection';
 import PromotionalBanner from './components/PromotionalBanner';
 
 function App() {
@@ -9,6 +10,7 @@ function App() {
       <Header />
       <main>
         <MainSection />
+        <DigitalMarketingSection />
         <PromotionalBanner />
       </main>
     </div>

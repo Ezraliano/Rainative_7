@@ -51,7 +51,7 @@ async def analyze_document(file: UploadFile = File(...)):
         )
         
         # Create enhanced summary with key points
-        enhanced_summary = _create_enhanced_summary(analysis_result)
+        enhanced_summary = analysis_result["summary"]
         
         # Generate content recommendations based on document analysis
         recommendations = await generate_content_idea(
@@ -82,13 +82,13 @@ async def analyze_document(file: UploadFile = File(...)):
         
         return AnalyzeResponse(
             video_metadata=dummy_metadata,
-            summary=enhanced_summary,
+            summary=analysis_result,
             timeline_summary=[],  # Not applicable for documents
             viral_score=viral_score,
             viral_label=viral_label,
             viral_explanation=_generate_viral_explanation(analysis_result),
             recommendations=recommendations,
-            doc_summary=analysis_result["summary"]
+            doc_summary=enhanced_summary
         )
         
     except Exception as e:
@@ -106,26 +106,6 @@ async def analyze_document(file: UploadFile = File(...)):
             except Exception as e:
                 logger.warning(f"Failed to delete temporary file: {str(e)}")
 
-def _create_enhanced_summary(analysis_result: dict) -> str:
-    """Create an enhanced summary that includes key points."""
-    summary = analysis_result["summary"]
-    key_points = analysis_result["key_points"]
-    doc_info = analysis_result["document_info"]
-    
-    enhanced_summary = f"{summary}\n\n"
-    
-    # Add document information
-    enhanced_summary += f"**Document Type:** {doc_info['document_type']}\n"
-    enhanced_summary += f"**Reading Time:** {doc_info['estimated_reading_time']}\n"
-    enhanced_summary += f"**Content Complexity:** {doc_info['complexity']}\n\n"
-    
-    # Add key points
-    if key_points:
-        enhanced_summary += "**Key Points:**\n"
-        for i, point in enumerate(key_points, 1):
-            enhanced_summary += f"{i}. {point}\n"
-    
-    return enhanced_summary
 
 def _calculate_document_viral_score(analysis_result: dict) -> int:
     """Calculate a viral potential score for document content."""
@@ -133,7 +113,7 @@ def _calculate_document_viral_score(analysis_result: dict) -> int:
     
     # Factors that increase viral potential
     word_count = analysis_result.get("word_count", 0)
-    key_points_count = len(analysis_result.get("key_points", []))
+    strengths_count = len(analysis_result.get("strengths_weaknesses", {}).get("strengths", []))
     doc_type = analysis_result.get("document_info", {}).get("document_type", "")
     
     # Word count factor (optimal range: 500-2000 words)
@@ -144,10 +124,10 @@ def _calculate_document_viral_score(analysis_result: dict) -> int:
     elif word_count > 2000:
         base_score += 5
     
-    # Key points factor
-    if key_points_count >= 5:
+    # Analysis depth factor
+    if strengths_count >= 4:
         base_score += 10
-    elif key_points_count >= 3:
+    elif strengths_count >= 2:
         base_score += 5
     
     # Document type factor
@@ -175,7 +155,7 @@ def _generate_viral_explanation(analysis_result: dict) -> str:
     """Generate explanation for document's viral potential."""
     doc_info = analysis_result.get("document_info", {})
     word_count = analysis_result.get("word_count", 0)
-    key_points_count = len(analysis_result.get("key_points", []))
+    analysis_depth = len(analysis_result.get("strengths_weaknesses", {}).get("strengths", []))
     
     explanation = f"This {doc_info.get('document_type', 'document').lower()} shows potential for content creation due to its "
     
@@ -186,10 +166,10 @@ def _generate_viral_explanation(analysis_result: dict) -> str:
     elif word_count > 500:
         factors.append("substantial content depth")
     
-    if key_points_count >= 5:
-        factors.append("multiple actionable insights")
-    elif key_points_count >= 3:
-        factors.append("clear key takeaways")
+    if analysis_depth >= 4:
+        factors.append("comprehensive analysis with multiple insights")
+    elif analysis_depth >= 2:
+        factors.append("solid analytical foundation")
     
     if doc_info.get("complexity") == "High":
         factors.append("detailed analysis that can be simplified for broader audiences")
