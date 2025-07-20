@@ -88,24 +88,23 @@ const PromotionalBanner: React.FC = () => {
             
             <div className="text-center mb-8">
               <h3 className="text-3xl font-bold text-white mb-2">Meet the Developer</h3>
-              <p className="text-gray-400">Building the future of content analysis</p>
+              <p className="text-gray-400">Building the future of AI tools</p>
             </div>
             
             <div className="flex flex-col md:flex-row items-center gap-8">
               <div className="flex-shrink-0">
                 <img 
-                  src="https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=300&h=300&fit=crop" 
+                  src="/public/Foto Laskar AI.jpg" 
                   alt="Developer Photo" 
                   className="w-40 h-40 rounded-full object-cover border-4 border-gradient-to-r from-cyan-400 to-blue-500 shadow-2xl"
                 />
               </div>
               <div className="text-center md:text-left flex-1">
-                <h4 className="text-2xl font-bold text-white mb-2">Alex Johnson</h4>
+                <h4 className="text-2xl font-bold text-white mb-2">Ezraliano Sachio Krisnadiva</h4>
                 <p className="text-cyan-400 font-medium mb-4 text-lg">AI Engineer & Full-Stack Developer</p>
                 <p className="text-gray-300 leading-relaxed mb-6">
-                  Passionate about creating AI-powered solutions that help content creators succeed. 
-                  With 5+ years of experience in machine learning and web development, I built Rainative AI 
-                  to democratize content analysis and viral prediction for creators worldwide.
+                  Passionate about creating AI-powered solutions that help businesses succees and efficient. Graduated from
+                  Laskar AI Program at Listasarta. Graduated from Ma Chung University Malang Bachelor Computer Science.
                 </p>
                 
                 {/* Contact Information */}
@@ -114,15 +113,15 @@ const PromotionalBanner: React.FC = () => {
                   <div className="space-y-2">
                     <div className="flex items-center justify-center md:justify-start">
                       <Mail className="h-4 w-4 text-cyan-400 mr-3" />
-                      <span className="text-gray-300">alex.johnson@rainative.ai</span>
+                      <span className="text-gray-300">krisnadiva456@gmail.com</span>
                     </div>
                     <div className="flex items-center justify-center md:justify-start">
                       <Github className="h-4 w-4 text-cyan-400 mr-3" />
-                      <span className="text-gray-300">github.com/alexjohnson</span>
+                      <span className="text-gray-300">https://github.com/Ezraliano</span>
                     </div>
                     <div className="flex items-center justify-center md:justify-start">
                       <Linkedin className="h-4 w-4 text-cyan-400 mr-3" />
-                      <span className="text-gray-300">linkedin.com/in/alexjohnson</span>
+                      <span className="text-gray-300">https://www.linkedin.com/in/ezraliano-sachio-krisnadiva-358028241/</span>
                     </div>
                   </div>
                 </div>
