@@ -4,7 +4,7 @@
 
 :root {
   font-family: 'Inter', sans-serif;
-  line-height: 1.5;
+  line-height: 1.4;
   font-weight: 400;
 }
 
@@ -14,6 +14,7 @@ body {
   background-color: #111827;
   color: #ffffff;
   scroll-behavior: smooth;
+  font-size: 14px;
 }
 
 @keyframes pulse {
